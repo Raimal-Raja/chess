@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}Login - ChessHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .login-container {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 0;
+    }
+
+    .login-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        max-width: 900px;
+        width: 100%;
+        display: flex;
+    }
+
+    .login-left {
+        flex: 1;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 60px 40px;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+
+    .login-left i {
+        font-size: 80px;
+        margin-bottom: 20px;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-20px); }
+    }
+
+    .login-left h2 {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+        font-weight: bold;
+    }
+
+    .login-left p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .login-right {
+        flex: 1;
+        padding: 60px 40px;
+    }
+
+    .login-right h3 {
+        color: var(--primary-color);
+        margin-bottom: 30px;
+        font-weight: bold;
+    }
+
+    .form-control {
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        transition: all 0.3s;
+    }
+
+    .form-control:focus {
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    }
+
+    .input-group-text {
+        background: var(--secondary-color);
+        border: none;
+        color: white;
+    }
+
+    .btn-login {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 10px;
+        color: white;
+        font-weight: bold;
+        font-size: 1.1rem;
+        transition: all 0.3s;
+    }
+
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    }
+
+    .form-check-input:checked {
+        background-color: var(--secondary-color);
+        border-color: var(--secondary-color);
+    }
+
+    .register-link {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .register-link a {
+        color: var(--secondary-color);
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .register-link a:hover {
+        text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+        .login-card {
+            flex-direction: column;
+        }
+        
+        .login-left {
+            padding: 40px 20px;
+        }
+        
+        .login-right {
+            padding: 40px 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-left">
+            <i class="fas fa-chess-knight"></i>
+            <h2>Welcome Back!</h2>
+            <p>Master your chess skills and challenge players worldwide</p>
+        </div>
+        
+        <div class="login-right">
+            <h3><i class="fas fa-sign-in-alt"></i> Login to Your Account</h3>
+            
+            <form method="POST" action="{{ url_for('login') }}">
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                        <input type="text" class="form-control" name="username" placeholder="Enter your username" required>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                        <input type="password" class="form-control" name="password" placeholder="Enter your password" required>
+                    </div>
+                </div>
+                
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                    <label class="form-check-label" for="remember">Remember me</label>
+                </div>
+                
+                <button type="submit" class="btn btn-login">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+            </form>
+            
+            <div class="register-link">
+                <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

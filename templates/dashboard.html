@@ -1,0 +1,368 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - ChessHub{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/chess-board-update.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h3><i class="fas fa-user-circle"></i> Player Details</h3>
+        <button class="close-sidebar" onclick="toggleSidebar()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    
+    <div class="sidebar-content">
+        <div class="player-info">
+            {% if user.profile_pic and user.profile_pic != 'default.png' %}
+                <img src="{{ url_for('static', filename='uploads/' + user.profile_pic) }}" alt="Profile" class="sidebar-profile-pic">
+            {% else %}
+                <img src="https://ui-avatars.com/api/?name={{ user.username }}&size=120&background=667eea&color=fff" alt="Profile" class="sidebar-profile-pic">
+            {% endif %}
+            <h4>{{ user.username }}</h4>
+            <p class="rating"><i class="fas fa-star"></i> {{ stats.rating }} Rating</p>
+        </div>
+
+        <div class="sidebar-stats">
+            <h5><i class="fas fa-chart-bar"></i> Game Statistics</h5>
+            
+            <div class="stat-item">
+                <span class="stat-label">Total Games</span>
+                <span class="stat-value">{{ stats.total_games }}</span>
+            </div>
+            
+            <div class="stat-item">
+                <span class="stat-label">Wins</span>
+                <span class="stat-value text-success">{{ stats.wins }}</span>
+            </div>
+            
+            <div class="stat-item">
+                <span class="stat-label">Losses</span>
+                <span class="stat-value text-danger">{{ stats.losses }}</span>
+            </div>
+            
+            <div class="stat-item">
+                <span class="stat-label">Draws</span>
+                <span class="stat-value text-warning">{{ stats.draws }}</span>
+            </div>
+            
+            <div class="stat-item">
+                <span class="stat-label">Win Rate</span>
+                <span class="stat-value">{{ stats.win_rate }}%</span>
+            </div>
+        </div>
+
+        <div class="sidebar-actions">
+            <a href="{{ url_for('profile') }}" class="btn btn-primary btn-block">
+                <i class="fas fa-user-edit"></i> Edit Profile
+            </a>
+            <a href="{{ url_for('game_history') }}" class="btn btn-secondary btn-block">
+                <i class="fas fa-history"></i> Game History
+            </a>
+            <a href="{{ url_for('leaderboard') }}" class="btn btn-info btn-block">
+                <i class="fas fa-trophy"></i> Leaderboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Overlay for sidebar -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- Main Dashboard -->
+<div class="dashboard-wrapper">
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <button class="hamburger-btn" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+        
+        <div class="profile-corner">
+            {% if user.profile_pic and user.profile_pic != 'default.png' %}
+                <img src="{{ url_for('static', filename='uploads/' + user.profile_pic) }}" alt="Profile" class="profile-pic-small">
+            {% else %}
+                <img src="https://ui-avatars.com/api/?name={{ user.username }}&size=40&background=667eea&color=fff" alt="Profile" class="profile-pic-small">
+            {% endif %}
+            <span class="username-small">{{ user.username }}</span>
+        </div>
+    </div>
+
+    <div class="dashboard-container">
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Left Column: Stats -->
+                <div class="col-lg-3 col-md-12 mb-4">
+                    <!-- Move Analysis Stats -->
+                    <div class="stats-card">
+                        <h4><i class="fas fa-brain"></i> Move Analysis</h4>
+                        <div id="moveAnalysisStats">
+                            <div class="analysis-stat excellent">
+                                <i class="fas fa-star"></i>
+                                <div>
+                                    <span class="analysis-label">Excellent Moves</span>
+                                    <span class="analysis-value" id="excellentMoves">0</span>
+                                </div>
+                            </div>
+                            
+                            <div class="analysis-stat good">
+                                <i class="fas fa-thumbs-up"></i>
+                                <div>
+                                    <span class="analysis-label">Good Moves</span>
+                                    <span class="analysis-value" id="goodMoves">0</span>
+                                </div>
+                            </div>
+                            
+                            <div class="analysis-stat inaccuracy">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <div>
+                                    <span class="analysis-label">Inaccuracies</span>
+                                    <span class="analysis-value" id="inaccuracies">0</span>
+                                </div>
+                            </div>
+                            
+                            <div class="analysis-stat mistake">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <div>
+                                    <span class="analysis-label">Mistakes</span>
+                                    <span class="analysis-value" id="mistakes">0</span>
+                                </div>
+                            </div>
+                            
+                            <div class="analysis-stat blunder">
+                                <i class="fas fa-times-circle"></i>
+                                <div>
+                                    <span class="analysis-label">Blunders</span>
+                                    <span class="analysis-value" id="blunders">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Player Stats Table -->
+                    <div class="stats-card mt-4">
+                        <h4><i class="fas fa-chart-line"></i> Player Statistics</h4>
+                        <table class="stats-table">
+                            <tbody>
+                                <tr>
+                                    <td><i class="fas fa-trophy text-warning"></i> Wins</td>
+                                    <td class="text-end"><strong>{{ stats.wins }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fas fa-times-circle text-danger"></i> Losses</td>
+                                    <td class="text-end"><strong>{{ stats.losses }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fas fa-chess-board text-info"></i> Total Matches</td>
+                                    <td class="text-end"><strong>{{ stats.total_games }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fas fa-star text-primary"></i> Elo Rating</td>
+                                    <td class="text-end"><strong class="text-primary">{{ stats.rating }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fas fa-percentage text-success"></i> Win Rate</td>
+                                    <td class="text-end"><strong class="text-success">{{ stats.win_rate }}%</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Center Column: Chess Board -->
+                <div class="col-lg-6 col-md-12 mb-4">
+                    <div class="game-section">
+                        <!-- Chess Board Container -->
+                        <div id="boardContainer">
+                            <div class="player-indicator player-black">
+                                <i class="fas fa-circle"></i>
+                                <span id="blackPlayerName">Black Player</span>
+                                <span class="turn-indicator" id="blackTurn"></span>
+                            </div>
+
+                            <div class="chessboard" id="chessboard">
+                                <!-- Board will be generated by JavaScript -->
+                            </div>
+
+                            <div class="player-indicator player-white">
+                                <i class="fas fa-circle"></i>
+                                <span id="whitePlayerName">{{ user.username }}</span>
+                                <span class="turn-indicator active" id="whiteTurn">Your Turn</span>
+                            </div>
+                        </div>
+
+                        <!-- Game Result Screen -->
+                        <div id="gameResultScreen" style="display: none;">
+                            <div class="result-container">
+                                <div class="result-header">
+                                    <h2 id="resultTitle">Game Over</h2>
+                                    <div id="resultWinner" class="result-winner"></div>
+                                </div>
+
+                                <div class="result-scores">
+                                    <div class="player-score">
+                                        <h4>White Player</h4>
+                                        <div class="score-details">
+                                            <div class="score-item">
+                                                <i class="fas fa-star text-success"></i>
+                                                <span>Excellent: <strong id="whiteExcellent">0</strong></span>
+                                            </div>
+                                            <div class="score-item">
+                                                <i class="fas fa-thumbs-up text-info"></i>
+                                                <span>Good: <strong id="whiteGood">0</strong></span>
+                                            </div>
+                                            <div class="score-item">
+                                                <i class="fas fa-exclamation-circle text-warning"></i>
+                                                <span>Inaccuracies: <strong id="whiteInaccuracies">0</strong></span>
+                                            </div>
+                                            <div class="score-item">
+                                                <i class="fas fa-exclamation-triangle text-orange"></i>
+                                                <span>Mistakes: <strong id="whiteMistakes">0</strong></span>
+                                            </div>
+                                            <div class="score-item">
+                                                <i class="fas fa-times-circle text-danger"></i>
+                                                <span>Blunders: <strong id="whiteBlunders">0</strong></span>
+                                            </div>
+                                        </div>
+                                        <div class="accuracy-score">
+                                            <span>Accuracy: <strong id="whiteAccuracy">0%</strong></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="vs-divider">VS</div>
+
+                                    <div class="player-score">
+                                        <h4>Black Player</h4>
+                                        <div class="score-details">
+                                            <div class="score-item">
+                                                <i class="fas fa-star text-success"></i>
+                                                <span>Excellent: <strong id="blackExcellent">0</strong></span>
+                                            </div>
+                                            <div class="score-item">
+                                                <i class="fas fa-thumbs-up text-info"></i>
+                                                <span>Good: <strong id="blackGood">0</strong></span>
+                                            </div>
+                                            <div class="score-item">
+                                                <i class="fas fa-exclamation-circle text-warning"></i>
+                                                <span>Inaccuracies: <strong id="blackInaccuracies">0</strong></span>
+                                            </div>
+                                            <div class="score-item">
+                                                <i class="fas fa-exclamation-triangle text-orange"></i>
+                                                <span>Mistakes: <strong id="blackMistakes">0</strong></span>
+                                            </div>
+                                            <div class="score-item">
+                                                <i class="fas fa-times-circle text-danger"></i>
+                                                <span>Blunders: <strong id="blackBlunders">0</strong></span>
+                                            </div>
+                                        </div>
+                                        <div class="accuracy-score">
+                                            <span>Accuracy: <strong id="blackAccuracy">0%</strong></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="best-player">
+                                    <i class="fas fa-trophy"></i>
+                                    <span id="bestPlayerText">Best Performance: -</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Game Controls -->
+                        <div class="game-controls">
+                            <div id="initialControls">
+                                <button class="btn btn-primary btn-lg" onclick="showGameOptions()">
+                                    <i class="fas fa-play"></i> New Game
+                                </button>
+                            </div>
+
+                            <div id="gameOptions" style="display: none;">
+                                <button class="btn btn-success btn-lg" onclick="startGame('pvp')">
+                                    <i class="fas fa-users"></i> Play with Friend
+                                </button>
+                                <button class="btn btn-warning btn-lg" onclick="startGame('bot')">
+                                    <i class="fas fa-robot"></i> Play with Bot
+                                </button>
+                                <button class="btn btn-secondary" onclick="hideGameOptions()">
+                                    <i class="fas fa-times"></i> Cancel
+                                </button>
+                            </div>
+
+                            <div id="gameActiveControls" style="display: none;">
+                                <button class="btn btn-info" onclick="undoMove()" id="undoBtn">
+                                    <i class="fas fa-undo"></i> Undo Move
+                                </button>
+                                <button class="btn btn-danger" onclick="resignGame()">
+                                    <i class="fas fa-flag"></i> Resign
+                                </button>
+                            </div>
+
+                            <div id="gameOverControls" style="display: none;">
+                                <button class="btn btn-primary btn-lg" onclick="playAgain()">
+                                    <i class="fas fa-redo"></i> New Game
+                                </button>
+                                <button class="btn btn-secondary" onclick="viewGameHistory()">
+                                    <i class="fas fa-history"></i> View History
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Game Status -->
+                        <div class="game-status" id="gameStatus">
+                            <div class="status-message" id="statusMessage">
+                                Click "New Game" to start playing
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Captured Pieces & Move History -->
+                <div class="col-lg-3 col-md-12 mb-4">
+                    <!-- Captured Pieces -->
+                    <div class="stats-card">
+                        <h4><i class="fas fa-chess-knight"></i> Captured Pieces</h4>
+                        
+                        <div class="captured-section">
+                            <h6>White Captured:</h6>
+                            <div class="captured-pieces" id="whiteCaptured">
+                                <span class="no-captures">No pieces captured</span>
+                            </div>
+                        </div>
+
+                        <div class="captured-section mt-3">
+                            <h6>Black Captured:</h6>
+                            <div class="captured-pieces" id="blackCaptured">
+                                <span class="no-captures">No pieces captured</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Move History -->
+                    <div class="stats-card mt-4">
+                        <h4><i class="fas fa-list"></i> Move History</h4>
+                        <div class="move-history" id="moveHistory">
+                            <div class="no-moves">No moves yet</div>
+                        </div>
+                    </div>
+
+                    <!-- Game Timer (Optional) -->
+                    <div class="stats-card mt-4">
+                        <h4><i class="fas fa-clock"></i> Game Timer</h4>
+                        <div class="game-timer">
+                            <div class="timer-display" id="gameTimer">00:00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

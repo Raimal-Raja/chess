@@ -1,0 +1,31 @@
+<!-- templates/game.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chess Game</title>
+    <script src="/static/js/game.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.js"></script>
+</head>
+<body>
+    <div id="board" style="width: 400px; height: 400px; font-size: 40px; line-height: 50px; text-align: center;"></div>
+    <script>
+        const socket = io();
+        const gameId = window.location.pathname.split('/').pop();
+        socket.emit('join_game', {game_id: gameId});
+
+        socket.on('player_joined', (data) => {
+            console.log('Player joined as ' + data.color);
+        });
+
+        socket.on('move_made', (data) => {
+            updateBoard(data.board);
+        });
+
+        // Fetch initial state
+        fetch('/get_state').then(res => res.json()).then(data => {
+            updateBoard(data.board);
+        });
+    </script>
+</body>
+</html>

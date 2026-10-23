@@ -1,0 +1,421 @@
+{% extends "base.html" %}
+
+{% block title %}Game Analysis - ChessHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .analysis-container {
+        max-width: 1400px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+
+    .analysis-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 20px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .analysis-header h1 {
+        margin: 0 0 10px 0;
+        font-size: 2rem;
+    }
+
+    .game-info-bar {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        flex-wrap: wrap;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        background: white;
+        color: #667eea;
+        border: 2px solid #667eea;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s;
+        margin-bottom: 30px;
+    }
+
+    .back-btn:hover {
+        background: #667eea;
+        color: white;
+        transform: translateX(-5px);
+    }
+
+    .analysis-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-top: 30px;
+    }
+
+    .player-analysis {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .player-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 3px solid #f3f4f6;
+    }
+
+    .player-name {
+        font-size: 1.5rem;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .accuracy-badge {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 20px;
+        font-size: 1.3rem;
+        font-weight: bold;
+    }
+
+    .move-categories {
+        display: grid;
+        gap: 15px;
+    }
+
+    .category-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 15px;
+        border-radius: 12px;
+        transition: transform 0.2s;
+    }
+
+    .category-item:hover {
+        transform: translateX(5px);
+    }
+
+    .category-excellent {
+        background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+        border-left: 4px solid #10b981;
+    }
+
+    .category-good {
+        background: linear-gradient(135deg, #eff6ff, #dbeafe);
+        border-left: 4px solid #3b82f6;
+    }
+
+    .category-inaccuracy {
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+        border-left: 4px solid #f59e0b;
+    }
+
+    .category-mistake {
+        background: linear-gradient(135deg, #fed7aa, #fdba74);
+        border-left: 4px solid #fb923c;
+    }
+
+    .category-blunder {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        border-left: 4px solid #ef4444;
+    }
+
+    .category-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .category-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+
+    .avg-cp-loss {
+        margin-top: 30px;
+        padding: 20px;
+        background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+        border-radius: 12px;
+        text-align: center;
+    }
+
+    .avg-cp-loss h3 {
+        margin: 0 0 10px 0;
+        color: #6b7280;
+        font-size: 1rem;
+    }
+
+    .avg-cp-loss .value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #1f2937;
+    }
+
+    .summary-card {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        grid-column: 1 / -1;
+        text-align: center;
+    }
+
+    .summary-card h2 {
+        margin-bottom: 20px;
+        color: #1f2937;
+    }
+
+    .winner-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 15px 30px;
+        border-radius: 30px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-top: 20px;
+    }
+
+    .winner-white {
+        background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+        color: #1f2937;
+    }
+
+    .winner-black {
+        background: linear-gradient(135deg, #374151, #1f2937);
+        color: white;
+    }
+
+    .winner-draw {
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        color: white;
+    }
+
+    @media (max-width: 968px) {
+        .analysis-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="analysis-container">
+    <a href="{{ url_for('game_history') }}" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to History
+    </a>
+
+    <div class="analysis-header">
+        <h1><i class="fas fa-chart-line"></i> Game Analysis</h1>
+        <div class="game-info-bar">
+            <div class="info-item">
+                <i class="far fa-calendar"></i>
+                <span>{{ game.created_at.strftime('%B %d, %Y') }}</span>
+            </div>
+            <div class="info-item">
+                <i class="far fa-clock"></i>
+                <span>
+                    {% if game.duration %}
+                    {{ (game.duration // 60)|int }}:{{ "%02d"|format(game.duration % 60) }}
+                    {% else %}
+                    N/A
+                    {% endif %}
+                </span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-chess"></i>
+                <span>{{ (game.moves|length // 2)|int if game.moves else 0 }} Moves</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="analysis-grid">
+        <!-- White Player Analysis -->
+        <div class="player-analysis">
+            <div class="player-header">
+                <div class="player-name">
+                    <i class="fas fa-circle" style="color: #ffffff; text-shadow: 0 0 3px rgba(0,0,0,0.5);"></i>
+                    White Player
+                </div>
+                <div class="accuracy-badge">
+                    {% set white_total = analysis.white.excellents + analysis.white.inaccuracies +
+                    analysis.white.mistakes + analysis.white.blunders %}
+                    {% set white_accuracy = ((analysis.white.excellents / (white_total|default(1)) * 100)|round|int) if
+                    white_total > 0 else 0 %}
+                    {{ white_accuracy }}% Accuracy
+                </div>
+            </div>
+
+            <div class="move-categories">
+                <div class="category-item category-excellent">
+                    <div class="category-label">
+                        <i class="fas fa-star"></i>
+                        <span>Excellent Moves</span>
+                    </div>
+                    <div class="category-value">{{ analysis.white.excellents }}</div>
+                </div>
+
+                <div class="category-item category-good">
+                    <div class="category-label">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Good Moves</span>
+                    </div>
+                    <div class="category-value">{{ analysis.white.good|default(0) }}</div>
+                </div>
+
+                <div class="category-item category-inaccuracy">
+                    <div class="category-label">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>Inaccuracies</span>
+                    </div>
+                    <div class="category-value">{{ analysis.white.inaccuracies }}</div>
+                </div>
+
+                <div class="category-item category-mistake">
+                    <div class="category-label">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Mistakes</span>
+                    </div>
+                    <div class="category-value">{{ analysis.white.mistakes }}</div>
+                </div>
+
+                <div class="category-item category-blunder">
+                    <div class="category-label">
+                        <i class="fas fa-times-circle"></i>
+                        <span>Blunders</span>
+                    </div>
+                    <div class="category-value">{{ analysis.white.blunders }}</div>
+                </div>
+            </div>
+
+            <div class="avg-cp-loss">
+                <h3>Average Centipawn Loss</h3>
+                <div class="value">
+                    {{ ((analysis.white.avg_cp_loss|default(0))|round)|int }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Black Player Analysis -->
+        <div class="player-analysis">
+            <div class="player-header">
+                <div class="player-name">
+                    <i class="fas fa-circle" style="color: #000000;"></i>
+                    Black Player
+                </div>
+                <div class="accuracy-badge">
+                    {% set black_total = analysis.black.excellents + analysis.black.inaccuracies +
+                    analysis.black.mistakes + analysis.black.blunders %}
+                    {% set black_accuracy = ((analysis.black.excellents / (black_total|default(1)) * 100)|round|int) if
+                    black_total > 0 else 0 %}
+                    {{ black_accuracy }}% Accuracy
+                </div>
+            </div>
+
+            <div class="move-categories">
+                <div class="category-item category-excellent">
+                    <div class="category-label">
+                        <i class="fas fa-star"></i>
+                        <span>Excellent Moves</span>
+                    </div>
+                    <div class="category-value">{{ analysis.black.excellents }}</div>
+                </div>
+
+
+                <div class="category-item category-good">
+                    <div class="category-label">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Good Moves</span>
+                    </div>
+                    <div class="category-value">{{ analysis.white.good|default(0) }}</div>
+                </div>
+
+                <div class="category-item category-inaccuracy">
+                    <div class="category-label">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>Inaccuracies</span>
+                    </div>
+                    <div class="category-value">{{ analysis.black.inaccuracies }}</div>
+                </div>
+
+                <div class="category-item category-mistake">
+                    <div class="category-label">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Mistakes</span>
+                    </div>
+                    <div class="category-value">{{ analysis.black.mistakes }}</div>
+                </div>
+
+                <div class="category-item category-blunder">
+                    <div class="category-label">
+                        <i class="fas fa-times-circle"></i>
+                        <span>Blunders</span>
+                    </div>
+                    <div class="category-value">{{ analysis.black.blunders }}</div>
+                </div>
+            </div>
+
+            <div class="avg-cp-loss">
+                <h3>Average Centipawn Loss</h3>
+                <div class="value">
+                    {{ ((analysis.black.avg_cp_loss|default(0))|round)|int }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Summary -->
+        <div class="summary-card">
+            <h2>Game Result</h2>
+            {% if game.winner == 'draw' %}
+            <div class="winner-badge winner-draw">
+                <i class="fas fa-handshake"></i>
+                <span>Draw</span>
+            </div>
+            {% elif game.winner == 'white' %}
+            <div class="winner-badge winner-white">
+                <i class="fas fa-trophy"></i>
+                <span>White Wins!</span>
+            </div>
+            {% else %}
+            <div class="winner-badge winner-black">
+                <i class="fas fa-trophy"></i>
+                <span>Black Wins!</span>
+            </div>
+            {% endif %}
+
+            <p style="margin-top: 20px; color: #6b7280;">
+                {% if white_accuracy > black_accuracy %}
+                White played more accurately overall
+                {% elif black_accuracy > white_accuracy %}
+                Black played more accurately overall
+                {% else %}
+                Both players performed equally
+                {% endif %}
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

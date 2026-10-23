@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - ChessHub{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="stats-card p-4">
+                <h2 class="mb-4"><i class="fas fa-user"></i> Edit Profile</h2>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show"
+                    role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+
+                <form method="POST" enctype="multipart/form-data" class="row g-3" id="profileForm">
+                    <div class="col-md-6 text-center">
+                        <div class="profile-pic-container mb-3">
+                            {% if user.profile_pic and user.profile_pic != 'default.png' %}
+                            <img src="{{ url_for('static', filename='uploads/' + user.profile_pic) }}"
+                                alt="Profile" class="profile-pic-large" id="profileImg">
+                            {% else %}
+                            <img src="https://ui-avatars.com/api/?name={{ user.username }}&size=200&background=667eea&color=fff"
+                                alt="Profile" class="profile-pic-large" id="profileImg">
+                            {% endif %}
+                        </div>
+
+                        <label class="btn btn-primary btn-sm" for="fileInput">
+                            <i class="fas fa-camera"></i> Change Photo
+                        </label>
+                        <input type="file" name="profile_pic" id="fileInput" accept="image/*" class="d-none">
+                        <div id="fileName" class="mt-2 small text-muted"></div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Username</strong></label>
+                            <p class="form-control-plaintext">{{ user.username }}</p>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Email</strong></label>
+                            <p class="form-control-plaintext">{{ user.email }}</p>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="bio" class="form-label">Bio</label>
+                            <textarea class="form-control" id="bio" name="bio" rows="4"
+                                placeholder="Tell us about yourself...">{{ user.bio if user.bio else '' }}</textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="stats-card p-4 mt-4">
+                <h4><i class="fas fa-chart-bar"></i> Your Statistics</h4>
+                <div class="row text-center mt-3">
+                    <div class="col-6 col-md-3 mb-3">
+                        <div class="stat-circle bg-primary text-white">
+                            {{ stats.total_games }}
+                        </div>
+                        <small class="text-muted">Total Games</small>
+                    </div>
+                    <div class="col-6 col-md-3 mb-3">
+                        <div class="stat-circle bg-success text-white">
+                            {{ stats.wins }}
+                        </div>
+                        <small class="text-muted">Wins</small>
+                    </div>
+                    <div class="col-6 col-md-3 mb-3">
+                        <div class="stat-circle bg-warning text-white">
+                            {{ stats.draws }}
+                        </div>
+                        <small class="text-muted">Draws</small>
+                    </div>
+                    <div class="col-6 col-md-3 mb-3">
+                        <div class="stat-circle bg-danger text-white">
+                            {{ stats.losses }}
+                        </div>
+                        <small class="text-muted">Losses</small>
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <h5>Win Rate: <strong class="text-success">{{ stats.win_rate }}%</strong></h5>
+                    <h5>Current Rating: <strong class="text-primary">{{ stats.rating }}</strong></h5>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .profile-pic-large {
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #667eea;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 8px;
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+</style>
+
+<script>
+    // Preview image when file is selected
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        const fileName = document.getElementById('fileName');
+        
+        if (file) {
+            // Show filename
+            fileName.textContent = `Selected: ${file.name}`;
+            
+            // Preview image
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('profileImg').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            fileName.textContent = '';
+        }
+    });
+</script>
+{% endblock %}

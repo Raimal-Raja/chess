@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Game History - ChessHub{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/game_history.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="history-header">
+        <h1><i class="fas fa-history"></i> Game History</h1>
+        <p>Review your past matches, analyze your moves, and track your progress.</p>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover history-table">
+            <thead class="thead-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Opponent</th>
+                    <th>Result</th>
+                    <th>Winner</th>
+                    <th>Duration (s)</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if games %}
+                    {% for game in games %}
+                    <tr>
+                        <td>{{ game.id }}</td>
+                        <td>
+                            <i class="fas fa-user"></i>
+                            {{ game.get_opponent_name(current_user.id) }}
+                        </td>
+                        {% set result = game.get_result(current_user.id) %}
+                        <td>
+                            {% if result == 'Win' %}
+                                <span class="badge bg-success">{{ result }}</span>
+                            {% elif result == 'Loss' %}
+                                <span class="badge bg-danger">{{ result }}</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">{{ result }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if game.winner == 'draw' %}
+                                <i class="fas fa-handshake"></i> Draw
+                            {% elif game.winner %}
+                                <i class="fas fa-crown"></i> {{ game.winner|capitalize }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td>{{ game.duration }}s</td>
+                        <td>{{ game.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                            <a href="{{ url_for('analyze_game', game_id=game.id) }}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-search"></i> Analyze
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center">No games played yet. <a href="{{ url_for('dashboard') }}">Start a new game!</a></td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

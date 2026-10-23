@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Leaderboard - ChessHub{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/leaderboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="leaderboard-header">
+        <h1><i class="fas fa-trophy"></i> Global Leaderboard</h1>
+        <p>See how you stack up against the best players on ChessHub.</p>
+    </div>
+
+    <div class="leaderboard-table-container">
+        <table class="table table-striped leaderboard-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Player</th>
+                    <th>Rating</th>
+                    <th>Matches</th>
+                    <th>Win %</th>
+                    <th>Bio</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if users %}
+                    {% for user in users %}
+                    <tr class="{% if loop.index <= 3 %}top-rank{% endif %} {% if current_user.is_authenticated and current_user.id == user.id %}current-user-row{% endif %}">
+                        <td class="rank-cell">
+                            {% if loop.index == 1 %}
+                                <i class="fas fa-trophy gold"></i>
+                            {% elif loop.index == 2 %}
+                                <i class="fas fa-trophy silver"></i>
+                            {% elif loop.index == 3 %}
+                                <i class="fas fa-trophy bronze"></i>
+                            {% endif %}
+                            {{ loop.index }}
+                        </td>
+                        <td class="player-cell">
+                            {% if user.profile_pic and user.profile_pic != 'default.png' %}
+                                <img src="{{ url_for('static', filename='uploads/' + user.profile_pic) }}" alt="Profile" class="leaderboard-profile-pic">
+                            {% else %}
+                                <img src="https://ui-avatars.com/api/?name={{ user.username }}&size=40&background=667eea&color=fff" alt="Profile" class="leaderboard-profile-pic">
+                            {% endif %}
+                            <div class="player-details">
+                                <span class="player-name">{{ user.username }}</span>
+                                <span class="player-email">{{ user.email }}</span>
+                            </div>
+                        </td>
+                        <td class="rating-cell">
+                            <i class="fas fa-star"></i> {{ user.rating }}
+                        </td>
+                        <td>{{ user.games_played }}</td>
+                        <td>{{ user.get_win_rate() }}%</td>
+                        <td class="bio-cell">{{ user.bio or 'No bio yet.' }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center">No players found.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,107 @@
+/* static/css/leaderboard.css */
+.leaderboard-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.leaderboard-header h1 {
+    font-weight: 700;
+    color: #343a40;
+}
+
+.leaderboard-header p {
+    font-size: 1.1rem;
+    color: #6c757d;
+}
+
+.leaderboard-table-container {
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.leaderboard-table thead th {
+    background-color: #343a40;
+    color: #ffffff;
+    font-weight: 600;
+    text-align: center;
+}
+
+.leaderboard-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.leaderboard-table tbody tr:hover {
+    background-color: #e9ecef;
+}
+
+.leaderboard-table td, .leaderboard-table th {
+    vertical-align: middle;
+}
+
+.rank-cell {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+}
+
+.player-cell {
+    display: flex;
+    align-items: center;
+}
+
+.leaderboard-profile-pic {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    margin-right: 15px;
+    object-fit: cover;
+}
+
+.player-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.player-name {
+    font-weight: 600;
+    color: #212529;
+}
+
+.player-email {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.rating-cell {
+    font-weight: bold;
+    color: #667eea;
+    text-align: center;
+}
+
+.bio-cell {
+    font-size: 0.9rem;
+    color: #495057;
+    max-width: 250px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Highlight top 3 ranks */
+.top-rank .rank-cell {
+    position: relative;
+}
+
+.fa-trophy {
+    margin-right: 5px;
+}
+.fa-trophy.gold { color: #ffd700; }
+.fa-trophy.silver { color: #c0c0c0; }
+.fa-trophy.bronze { color: #cd7f32; }
+
+/* Highlight current user */
+.current-user-row {
+    background-color: #d1e7dd !important; /* A light green highlight */
+    font-weight: bold;
+}
